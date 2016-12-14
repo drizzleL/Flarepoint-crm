@@ -16,18 +16,24 @@ use Illuminate\Support\Facades\Input;
 use App\Models\Client;
 use App\Models\Department;
 use DB;
+use App\Repositories\BaseRepository;
 
-class UserRepository implements UserRepositoryContract
+class UserRepository extends BaseRepository implements UserRepositoryContract
 {
+
+    public function __construct(User $user)
+    {
+        $this->model = $user;
+    }
 
     public function find($id)
     {
-        return User::findOrFail($id);
+        return $this->model->findOrFail($id);
     }
 
     public function getAllUsers()
     {
-        return User::all();
+        return $this->model->all();
     }
 
     public function getAllUsersWithDepartments()
@@ -43,36 +49,41 @@ class UserRepository implements UserRepositoryContract
 
     public function create($requestData)
     {
-        $settings = Settings::first();
         $password =  bcrypt($requestData->password);
-        $role = $requestData->roles;
-        $department = $requestData->departments;
-        $companyname = $settings->company;
+        $role = $requestData->roles ?: 1;
+        $department = $requestData->departments ?: 1;
 
         if ($requestData->hasFile('image_path')) {
             if (!is_dir(public_path(). '/images/'. $companyname)) {
                 mkdir(public_path(). '/images/'. $companyname, 0777, true);
             }
-            $settings = Settings::findOrFail(1);
             $file =  $requestData->file('image_path');
 
             $destinationPath = public_path(). '/images/'. $companyname;
             $filename = str_random(8) . '_' . $file->getClientOriginalName() ;
 
             $file->move($destinationPath, $filename);
-            
+
             $input =  array_replace($requestData->all(), ['image_path'=>"$filename", 'password'=>"$password"]);
         } else {
             $input =  array_replace($requestData->all(), ['password'=>"$password"]);
         }
 
-        $user = User::create($input);
+        $user = $this->model;
+        $user->fill($input);
+        $user->save();
         $user->roles()->attach($role);
         $user->department()->attach($department);
-        $user->save();
 
         Session::flash('flash_message', 'User successfully added!'); //Snippet in Master.blade.php
         return $user;
+    }
+
+    public function assignTenant($user, $tenant_id)
+    {
+        $user->tenant_id = $tenant_id;
+        $user->save();
+        return;
     }
 
     public function update($id, $requestData)

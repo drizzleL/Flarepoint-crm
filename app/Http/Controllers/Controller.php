@@ -9,16 +9,4 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
-
-    protected $currentUserId;
-
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (auth()->check()) {
-                $this->currentUserId = auth()->user()->tenant_id;
-            }
-            return $next($request);
-        });
-    }
 }

@@ -150,7 +150,8 @@ class UsersController extends Controller
      */
     public function store(StoreUserRequest $userRequest)
     {
-        $getInsertedId = $this->users->create($userRequest);
+        $user = $this->users->create($userRequest);
+        $this->users->assignTenant($user, auth()->user()->tenant_id);
         return redirect()->route('users.index');
     }
 
@@ -203,7 +204,7 @@ class UsersController extends Controller
     public function destroy($id)
     {
         $this->users->destroy($id);
-        
+
         return redirect()->route('users.index');
     }
 }

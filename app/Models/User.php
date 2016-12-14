@@ -33,7 +33,7 @@ class User extends Authenticatable
      */
     protected $dates = ['trial_ends_at', 'subscription_ends_at'];
     protected $hidden = ['password', 'password_confirmation', 'remember_token'];
-    
+
 
     protected $primaryKey ='id';
 
@@ -52,7 +52,7 @@ class User extends Authenticatable
     {
         return $this->hasMany(Tasks::class, 'fk_user_id_assign', 'id')->where('status', 2);
     }
-    
+
     public function tasksAll()
     {
         return $this->hasMany(Tasks::class, 'fk_user_id_assign', 'id')->whereIn('status', [1, 2]);
@@ -87,4 +87,15 @@ class User extends Authenticatable
     {
         return Cache::has('user-is-online-' . $this->id);
     }
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
+
+    public function setEmailAttribute($value)
+    {
+        $this->attributes['email'] = strtolower($value);
+    }
+
 }

@@ -4,11 +4,9 @@ namespace App\Repositories;
 class BaseRepository
 {
     protected $model;
-    public function setTenantId($id = null)
+    public function whereModelTenantId($id)
     {
-        if (!is_null($id)) {
-            $this->model = $this->model->where('tenant_id', $id);
-        }
+        $this->model = $this->model->where('tenant_id', $id);
     }
     public function returnModel()
     {
