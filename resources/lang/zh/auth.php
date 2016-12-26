@@ -15,5 +15,6 @@ return [
 
     'failed' => '登录失败，请检查用户名与密码。',
     'throttle' => '尝试次数过多请 :seconds 秒后再次登录。',
+    'no_tenant' => '找不到租户帐号。',
 
 ];

@@ -12,10 +12,10 @@ class UsersTableSeeder extends Seeder
      */
     public function run()
     {
-        
+
 
         \DB::table('users')->delete();
-        
+
         \DB::table('users')->insert(array (
             0 =>
             array (
@@ -30,6 +30,7 @@ class UsersTableSeeder extends Seeder
                 'remember_token' => null,
                 'created_at' => '2016-06-04 13:42:19',
                 'updated_at' => '2016-06-04 13:42:19',
+                'tenant_id' => 1,
             ),
         ));
     }

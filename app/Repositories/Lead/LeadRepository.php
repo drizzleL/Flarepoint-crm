@@ -6,8 +6,9 @@ use Notifynder;
 use Carbon;
 use App\Models\Activity;
 use DB;
+use App\Repositories\BaseRepository;
 
-class LeadRepository implements LeadRepositoryContract
+class LeadRepository extends BaseRepository implements LeadRepositoryContract
 {
 
     const CREATED = 'created';
@@ -15,9 +16,15 @@ class LeadRepository implements LeadRepositoryContract
     const UPDATED_DEADLINE = 'updated_deadline';
     const UPDATED_ASSIGN = 'updated_assign';
 
+    public function __construct(Leads $lead)
+    {
+        $this->model = $lead;
+    }
+
     public function find($id)
     {
-        return Leads::findOrFail($id);
+        $model = $this->cloneModel();
+        return $model->findOrFail($id);
     }
 
     public function create($requestData)
@@ -29,18 +36,24 @@ class LeadRepository implements LeadRepositoryContract
              'contact_date' => $requestData->contact_date ." " . $requestData->contact_time . ":00"]
         );
 
-        $lead = Leads::create($input);
-        $insertedId = $lead->id;
+        $lead = $this->model->create($input);
         Session()->flash('flash_message', 'Lead successfully added!');
 
         event(new \App\Events\LeadAction($lead, self::CREATED));
 
-        return $insertedId;
+        return $lead;
+    }
+
+    public function assignTenant($model, $tenant_id)
+    {
+       $model->tenant_id = $tenant_id;
+       $model->save();
     }
 
     public function updateStatus($id, $requestData)
     {
-        $lead = Leads::findOrFail($id);
+        $model = $this->cloneModel();
+        $lead = $model->findOrFail($id);
 
         $input = $requestData->get('status');
         $input = array_replace($requestData->all(), ['status' => 2]);
@@ -50,7 +63,8 @@ class LeadRepository implements LeadRepositoryContract
 
     public function updateFollowup($id, $requestData)
     {
-        $lead = Leads::findOrFail($id);
+        $model = $this->cloneModel();
+        $lead = $model->findOrFail($id);
         $input = $requestData->all();
         $input = $requestData =
          [ 'contact_date' => $requestData->contact_date ." " . $requestData->contact_time . ":00"];
@@ -60,7 +74,8 @@ class LeadRepository implements LeadRepositoryContract
 
     public function updateAssign($id, $requestData)
     {
-        $lead = Leads::findOrFail($id);
+        $model = $this->cloneModel();
+        $lead = $model->findOrFail($id);
 
         $input = $requestData->get('fk_user_id_assign');
         $input = array_replace($requestData->all());
@@ -72,12 +87,14 @@ class LeadRepository implements LeadRepositoryContract
 
     public function allLeads()
     {
-        return Leads::all()->count();
+        $model = $this->cloneModel();
+        return $model->count();
     }
 
     public function allCompletedLeads()
     {
-        return Leads::where('status', 2)->count();
+        $model = $this->cloneModel();
+        return $model->where('status', 2)->count();
     }
 
     public function percantageCompleted()
@@ -93,7 +110,8 @@ class LeadRepository implements LeadRepositoryContract
 
     public function completedLeadsToday()
     {
-        return Leads::whereRaw(
+        $model = $this->cloneModel();
+        return $model->whereRaw(
             'date(updated_at) = ?',
             [Carbon::now()->format('Y-m-d')]
         )->where('status', 2)->count();
@@ -101,7 +119,8 @@ class LeadRepository implements LeadRepositoryContract
 
     public function createdLeadsToday()
     {
-        return Leads::whereRaw(
+        $model = $this->cloneModel();
+        return $model->whereRaw(
             'date(created_at) = ?',
             [Carbon::now()->format('Y-m-d')]
         )->count();
@@ -109,26 +128,29 @@ class LeadRepository implements LeadRepositoryContract
 
     public function completedLeadsThisMonth()
     {
-        return DB::table('leads')
-                 ->select(DB::raw('count(*) as total, updated_at'))
-                 ->where('status', 2)
-                 ->whereBetween('updated_at', [Carbon::now()->startOfMonth(), Carbon::now()])->get();
+        $model = $this->cloneModel();
+        return $model
+            ->select(DB::raw('count(*) as total, updated_at'))
+            ->where('status', 2)
+            ->whereBetween('updated_at', [Carbon::now()->startOfMonth(), Carbon::now()])->get();
     }
 
     public function createdLeadsMonthly()
     {
-        return DB::table('leads')
-             ->select(DB::raw('count(*) as month, updated_at'))
-             ->where('status', 2)
-             ->groupBy(DB::raw('YEAR(updated_at), MONTH(updated_at)'))
-             ->get();
+        $model = $this->cloneModel();
+        return $model
+            ->select(DB::raw('count(*) as month, updated_at'))
+            ->where('status', 2)
+            ->groupBy(DB::raw('YEAR(updated_at), MONTH(updated_at)'))
+            ->get();
     }
 
     public function completedLeadsMonthly()
     {
-        return DB::table('leads')
-         ->select(DB::raw('count(*) as month, created_at'))
-         ->groupBy(DB::raw('YEAR(created_at), MONTH(created_at)'))
-         ->get();
+        $model = $this->cloneModel();
+        return $model
+            ->select(DB::raw('count(*) as month, created_at'))
+            ->groupBy(DB::raw('YEAR(created_at), MONTH(created_at)'))
+            ->get();
     }
 }

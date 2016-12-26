@@ -20,6 +20,7 @@ $factory->define(App\Models\User::class, function (Faker\Generator $faker) {
         'work_number' => $faker->randomNumber(8),
         'personal_number' => $faker->randomNumber(8),
         'remember_token' => str_random(10),
+        'tenant_id' => $faker->numberBetween($min = 1, $max = 2),
     ];
 });
 
@@ -37,6 +38,7 @@ $factory->define(App\Models\Client::class, function (Faker\Generator $faker) {
         'industry_id' => $faker->numberBetween($min = 1, $max = 25),
         'fk_user_id' => $faker->numberBetween($min = 1, $max = 3),
         'company_type' => 'ApS',
+        'tenant_id' => $faker->numberBetween($min = 1, $max = 2),
     ];
 });
 
@@ -53,6 +55,7 @@ $factory->define(App\Models\Tasks::class, function (Faker\Generator $faker) {
         'deadline' => $faker->dateTimeThisYear($max = 'now'),
         'created_at' => $faker->dateTimeThisYear($max = 'now'),
         'updated_at' => $faker->dateTimeThisYear($max = 'now'),
+        'tenant_id' => $faker->numberBetween($min = 1, $max = 2),
     ];
 });
 
@@ -67,5 +70,6 @@ $factory->define(App\Models\Leads::class, function (Faker\Generator $faker) {
         'contact_date' => $faker->dateTimeThisYear($max = 'now'),
         'created_at' => $faker->dateTimeThisYear($max = 'now'),
         'updated_at' => $faker->dateTimeThisYear($max = 'now'),
+        'tenant_id' => $faker->numberBetween($min = 1, $max = 2),
     ];
 });

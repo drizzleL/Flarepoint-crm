@@ -32,6 +32,7 @@ class UsersController extends Controller
         DepartmentRepositoryContract $departments,
         SettingRepositoryContract $settings
     ) {
+        parent::__construct();
         $this->users = $users;
         $this->roles = $roles;
         $this->departments = $departments;
@@ -52,7 +53,9 @@ class UsersController extends Controller
     public function anyData()
     {
         $canUpdateUser = auth()->user()->can('update-user');
-        $users = User::select(['id', 'name', 'email', 'work_number']);
+        $this->users->belongsToTenant(auth()->user()->tenant_id);
+        $users = $this->users->returnModel()
+            ->select(['id', 'name', 'email', 'work_number']);
         return Datatables::of($users)
         ->addColumn('namelink', function ($users) {
                 return '<a href="users/'.$users->id.'" ">'.$users->name.'</a>';
@@ -138,9 +141,11 @@ class UsersController extends Controller
      */
     public function create()
     {
+        $this->departments->belongsToTenant(auth()->user()->tenant_id);
+        $departments = $this->departments->listAllDepartments();
         return view('users.create')
         ->withRoles($this->roles->listAllRoles())
-        ->withDepartments($this->departments->listAllDepartments());
+        ->withDepartments($departments);
     }
 
     /**
@@ -152,6 +157,9 @@ class UsersController extends Controller
     {
         $user = $this->users->create($userRequest);
         $this->users->assignTenant($user, auth()->user()->tenant_id);
+        $department = $requestData->departments
+            ?: $this->departments->getFirstDepartment()->id;
+        $user->department()->attach($department);
         return redirect()->route('users.index');
     }
 
@@ -176,10 +184,13 @@ class UsersController extends Controller
      */
     public function edit($id)
     {
+        $this->departments->whereTenant(auth()->user()->tenant_id);
+        //$this->departments->belongsToTenant(auth()->user()->tenant_id);
+        $departments = $this->departments->listAllDepartments();
         return view('users.edit')
         ->withUser($this->users->find($id))
         ->withRoles($this->roles->listAllRoles())
-        ->withDepartments($this->departments->listAllDepartments());
+        ->withDepartments($departments);
     }
 
     /**

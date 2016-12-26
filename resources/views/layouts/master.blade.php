@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Flarepoint CRM</title>
-        
+
     <link href="{{ URL::asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" >
 
   <link href="{{ URL::asset('css/jasny-bootstrap.css') }}" rel="stylesheet" type="text/css" >
@@ -12,7 +12,7 @@
       <script type="text/javascript" src="{{ URL::asset('js/vue.min.js') }}"></script>
        <!--- <script src="http://cdnjs.cloudflare.com/ajax/libs/vue/1.0.15/vue.min.js"></script> -->
           <script type="text/javascript" src="{{ URL::asset('js/jquery-2.2.3.min.js') }}"></script>
-          
+
 
         <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
      <link rel="stylesheet" type="text/css" href="{{ URL::asset('css/semantic.css') }}">
@@ -31,7 +31,7 @@
               <!---  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/i18n/jquery-ui-i18n.min.js"> -->
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
-<script src="//js.pusher.com/3.0/pusher.min.js"></script> 
+<script src="//js.pusher.com/3.0/pusher.min.js"></script>
  <script type="text/javascript" src="{{ URL::asset('js/Chart.min.js') }}"></script>
 <!--<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js"></script>-->
  <script type="text/javascript" src="{{ URL::asset('js/jquery-2.2.3.min.js') }}"></script>
@@ -48,14 +48,14 @@
   <a id="dLabel" role="button" data-toggle="dropdown" data-target="#" href="/page.html">
     <i class="glyphicon glyphicon-bell"><span id="notifycount"></span></i>
   </a>
-  
+
   <ul class="dropdown-menu notify-drop  notifications" role="menu" aria-labelledby="dLabel">
-    
+
     <div class="notification-heading"><h4 class="menu-title">Notifications</h4><h4 class="menu-title pull-right"><a href="{{url('notifications/markall')}}">Mark all as read</a><i class="glyphicon glyphicon-circle-arrow-right"></i></h4>
     </div>
     <li class="divider"></li>
    <div class="notifications-wrapper">
-     
+
      <span id="notification-item"></span>
 
 <script>
@@ -85,12 +85,12 @@ $(function(){
         count++;
         var id = notification['id'];
         var url = notification['data']['url'];
-        
-        msg += `<div> 
+
+        msg += `<div>
         <a class="content"  id="notify" href="{{url('notifications')}}/`+id+`">
-        ` 
-        + notification['data']['message'] + 
-        ` </a></div> 
+        `
+        + notification['data']['message'] +
+        ` </a></div>
         <hr class="notify-line"/>`;
          notifyItem.innerHTML = msg;
 
@@ -98,7 +98,7 @@ $(function(){
              return function(){
                  postRead(id);
              }})(id); **/
-  
+
      });
         bell.innerHTML = count;
     })
@@ -108,7 +108,7 @@ $(function(){
 </script>
 
    </div>
-    
+
   </ul>
   </a>
 </div>
@@ -120,26 +120,32 @@ $(function(){
   </button>
 </div>
 
-<!-- /#sidebar-wrapper 
+<!-- /#sidebar-wrapper
     <!-- Sidebar menu -->
 
 <nav id="myNavmenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm" role="navigation">
 
         <div class="list-group panel">
-        
-            <p class=" list-group-item" title=""><img src="{{url('images/flarepoint_logo.png')}}" alt=""></p>
 
-        
+            <p class=" list-group-item" title="" style="text-align: center;">
+                @if ($tenant_name)
+                <span style="font-size: 30px;color: white;">{{$tenant_name}}</span>
+                @else
+                <img src="{{url('images/flarepoint_logo.png')}}" alt="">
+                @endif
+            </p>
+
+
   <a href="{{route('dashboard', \Auth::id())}}" class=" list-group-item"  data-parent="#MainMenu"><i class="glyphicon glyphicon-dashboard"></i> @lang('menu.dashboard') </a>
   <a href="{{route('users.show', \Auth::id())}}" class=" list-group-item"  data-parent="#MainMenu"><i class="glyphicon glyphicon-user"></i> @lang('menu.profile') </a>
 
 
-            
+
                 <a href="#clients" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="glyphicon glyphicon-tag"></i> @lang('menu.clients.title') </i></a>
             <div class="collapse" id="clients">
-            
+
                 <a href="{{ route('clients.index')}}" class="list-group-item childlist">@lang('menu.clients.all')</a>
-                 @if(Entrust::can('client-create'))   
+                 @if(Entrust::can('client-create'))
                 <a href="{{ route('clients.create')}}" class="list-group-item childlist">@lang('menu.clients.new')</a>
                 @endif
             </div>
@@ -147,15 +153,15 @@ $(function(){
             <a href="#tasks" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="glyphicon glyphicon-tasks"></i>  @lang('menu.tasks.title') </a>
             <div class="collapse" id="tasks">
                 <a href="{{ route('tasks.index')}}" class="list-group-item childlist">@lang('menu.tasks.all')</a>
-             @if(Entrust::can('task-create'))   
+             @if(Entrust::can('task-create'))
                 <a href="{{ route('tasks.create')}}" class="list-group-item childlist">@lang('menu.tasks.new')</a>
                 @endif
             </div>
-            
+
                <a href="#user" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="fa fa-users"></i>  @lang('menu.users.title') </i></a>
             <div class="collapse" id="user">
                 <a href="{{ route('users.index')}}" class="list-group-item childlist">@lang('menu.users.all')</a>
-      @if(Entrust::can('user-create'))        
+      @if(Entrust::can('user-create'))
                 <a href="{{ route('users.create')}}" class="list-group-item childlist">@lang('menu.users.new')</i></a>
               @endif
             </div>
@@ -163,14 +169,14 @@ $(function(){
            <a href="#leads" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="glyphicon glyphicon-hourglass"></i>  @lang('menu.leads.title') </i></a>
             <div class="collapse" id="leads">
                 <a href="{{ route('leads.index')}}" class="list-group-item childlist">@lang('menu.leads.all')</a>
-                 @if(Entrust::can('lead-create'))   
+                 @if(Entrust::can('lead-create'))
                 <a href="{{ route('leads.create')}}" class="list-group-item childlist">@lang('menu.leads.new')</i></a>
                 @endif
             </div>
             <a href="#departments" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="fa fa-object-group"></i>  @lang('menu.departments.title') </i></a>
             <div class="collapse" id="departments">
             <a href="{{ route('departments.index')}}" class="list-group-item childlist">@lang('menu.departments.all')</a>
-          @if(Entrust::hasRole('administrator'))  
+          @if(Entrust::hasRole('administrator'))
             <a href="{{ route('departments.create')}}" class="list-group-item childlist">@lang('menu.departments.new')</i></a>
             @endif
             </div>
@@ -179,7 +185,7 @@ $(function(){
             <a href="#settings" class=" list-group-item" data-toggle="collapse" data-parent="#MainMenu"><i class="glyphicon glyphicon-cog"></i>  @lang('menu.settings.title') </i></a>
             <div class="collapse" id="settings">
             <a href="{{ route('settings.index')}}" class="list-group-item childlist">@lang('menu.settings.overall')</a>
-        
+
             <a href="{{ route('roles.index')}}" class="list-group-item childlist">@lang('menu.settings.roles')</i></a>
              <a href="{{ route('integrations.index')}}" class="list-group-item childlist">@lang('menu.settings.integrations')</i></a>
             </div>
@@ -187,7 +193,7 @@ $(function(){
 
   @endif
     <a href="{{ url('/logout') }}" class=" list-group-item impmenu"  data-parent="#MainMenu"><i class="glyphicon glyphicon-log-out"></i> @lang('menu.signout') </i></a>
-            
+
             </div>
 
 
@@ -210,7 +216,7 @@ $(function(){
                         <h1>@yield('heading')</h1>
                         @yield('content')
 
-                 
+
                 </div>
 
             </div>
@@ -237,10 +243,10 @@ $(function(){
         <span>{{ Session::get('flash_message') }} </span></div>
         </div>
         @endif
-           
+
         </div>
         </div>
-        
+
         <!-- /#page-content-wrapper -->
 
     </div>
@@ -248,9 +254,9 @@ $(function(){
 
     <!-- Bootstrap Core JavaScript -->
 
-    
-  <script type="text/javascript" src="{{ URL::asset('js/dropzone.js') }}"></script> 
-    <script type="text/javascript" src="{{ URL::asset('js/bootstrap.min.js') }}"></script> 
+
+  <script type="text/javascript" src="{{ URL::asset('js/dropzone.js') }}"></script>
+    <script type="text/javascript" src="{{ URL::asset('js/bootstrap.min.js') }}"></script>
 <!-- Bootstrap Core JavaScript -->
     <script src="{{ URL::asset('js/semantic.min.js') }}"></script>
 
@@ -260,9 +266,8 @@ $(function(){
           <script type="text/javascript" src="{{ URL::asset('js/sorttable.js') }}"></script>
            <script type="text/javascript" src="{{ URL::asset('js/jquery.dataTables.min.js') }}"></script>
            <script type="text/javascript" src="{{ URL::asset('js/jasny-bootstrap.min.js') }}"></script>
-           
+
            @stack('scripts')
 </body>
 
 </html>
-  

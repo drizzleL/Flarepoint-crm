@@ -6,14 +6,15 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\Tenant\TenantRepository;
 use App\Repositories\User\UserRepository;
+use App\Services\RegisterService;
 
 class RegisterController extends Controller
 {
-    public function __construct(TenantRepository $tenants, UserRepository $users)
+    public function __construct(RegisterService $service)
     {
-        parent::__construct();
-        $this->tenants = $tenants;
-        $this->users = $users;
+        $this->service = $service;
+        //$this->tenants = $tenants;
+        //$this->users = $users;
     }
     public function showRegistrationForm()
     {
@@ -28,10 +29,11 @@ class RegisterController extends Controller
             'password' => 'required|confirmed',
             'tenant' => 'required',
         ]);
-        $user = $this->users->create($request);
-        $tenant = $this->tenants->create($request->tenant, $user->id);
-        $user->tenant_id = $tenant->id;
-        $user->save();
-        return 'Tenant Created!';
+        $this->service->registerTenant($request);
+        //$user = $this->users->create($request);
+        //$tenant = $this->tenants->create($request->tenant, $user->id);
+        //$user->tenant_id = $tenant->id;
+        //$user->save();
+        return redirect('/');
     }
 }

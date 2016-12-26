@@ -45,7 +45,9 @@ class ClientsController extends Controller
 
     public function anyData()
     {
-        $clients = Client::select(['id', 'name', 'company_name', 'email', 'primary_number']);
+        $this->clients->belongsToTenant(auth()->user()->tenant_id);
+        $clients = $this->clients->returnModel()
+            ->select(['id', 'name', 'company_name', 'email', 'primary_number']);
         return Datatables::of($clients)
         ->addColumn('namelink', function ($clients) {
                 return '<a href="clients/'.$clients->id.'" ">'.$clients->name.'</a>';
@@ -81,7 +83,8 @@ class ClientsController extends Controller
      */
     public function store(StoreClientRequest $request)
     {
-        $this->clients->create($request->all());
+        $client = $this->clients->create($request->all());
+        $this->clients->assignTenant($client, auth()->user()->tenant_id);
         return redirect()->route('clients.index');
     }
 
@@ -139,6 +142,7 @@ class ClientsController extends Controller
      */
     public function destroy($id)
     {
+        $this->clients->belongsToTenant(auth()->user()->tenant_id);
         $this->clients->destroy($id);
         
         return redirect()->route('clients.index');

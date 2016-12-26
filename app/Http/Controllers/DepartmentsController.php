@@ -21,6 +21,7 @@ class DepartmentsController extends Controller
     }
     public function index()
     {
+        $this->departments->belongsToTenant(auth()->user()->tenant_id);
         return view('departments.index')
         ->withDepartment($this->departments->getAllDepartments());
     }
@@ -30,7 +31,9 @@ class DepartmentsController extends Controller
     }
     public function store(StoreDepartmentRequest $request)
     {
-        $this->departments->create($request);
+        $department = $this->departments->create($request);
+        $department->tenant_id = auth()->user()->tenant_id;
+        $department->save();
         Session::flash('flash_message', 'Successfully created New Department');
         return redirect()->route('departments.index');
     }

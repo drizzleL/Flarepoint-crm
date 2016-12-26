@@ -42,7 +42,14 @@ class PagesController extends Controller
 
     public function dashboard()
     {
+        $tenant_id = auth()->user()->tenant_id;
+        $this->users->belongsToTenant($tenant_id);
+        $this->leads->belongsToTenant($tenant_id);
+        $this->tasks->belongsToTenant($tenant_id);
+        $this->clients->belongsToTenant($tenant_id);
 
+        $createdTasksMonthly = $this->tasks->createdTasksMothly();
+        $createdTasksMonthly = $this->tasks->createdTasksToday();
       /**
          * Other Statistics
          *
@@ -50,6 +57,7 @@ class PagesController extends Controller
         $companyname = $this->settings->getCompanyName();
         $users = $this->users->getAllUsers();
         $totalClients = $this->clients->getAllClientsCount();
+        //$totalClients = $this->service->getClientsCount();
         $totalTimeSpent = $this->tasks->totalTimeSpent();
 
      /**
@@ -72,7 +80,7 @@ class PagesController extends Controller
       *
       */
          $taskCompletedThisMonth = $this->tasks->completedTasksThisMonth();
-    
+
 
      /**
       * Statistics for tasks each month(For Charts).
@@ -85,7 +93,7 @@ class PagesController extends Controller
       * Statistics for all-time Leads.
       *
       */
-     
+
         $allleads = $this->leads->allLeads();
         $allCompletedLeads = $this->leads->allCompletedLeads();
         $totalPercentageLeads = $this->leads->percantageCompleted();
@@ -109,10 +117,6 @@ class PagesController extends Controller
         $completedLeadsMonthly = $this->leads->createdLeadsMonthly();
 
         $createdLeadsMonthly = $this->leads->completedLeadsMonthly();
-        
-
-
-       
         return view('pages.dashboard', compact(
             'completedTasksToday',
             'completedLeadsToday',

@@ -14,6 +14,10 @@ class ViewComposerServiceProvider extends ServiceProvider
     public function boot()
     {
         view()->composer(
+            ['layouts.master'],
+            'App\Http\ViewComposers\BaseComposer'
+        );
+        view()->composer(
             ['users.show'],
             'App\Http\ViewComposers\UserHeaderComposer'
         );

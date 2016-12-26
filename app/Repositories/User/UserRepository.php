@@ -33,12 +33,12 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
 
     public function getAllUsers()
     {
-        return $this->model->all();
+        return $this->model->get();
     }
 
     public function getAllUsersWithDepartments()
     {
-        return  User::select(['users.name', 'users.id',
+        return  $this->model->select(['users.name', 'users.id',
                 DB::raw('CONCAT(users.name, " (", departments.name, ")") AS full_name')])
         ->join('department_user', 'users.id', '=', 'department_user.user_id')
         ->join('departments', 'department_user.department_id', '=', 'departments.id')
@@ -73,7 +73,7 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
         $user->fill($input);
         $user->save();
         $user->roles()->attach($role);
-        $user->department()->attach($department);
+        //$user->department()->attach($department);
 
         Session::flash('flash_message', 'User successfully added!'); //Snippet in Master.blade.php
         return $user;
@@ -90,7 +90,7 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
     {
         $settings = Settings::first();
         $companyname = $settings->company;
-        $user = User::findorFail($id);
+        $user = $this->model->findorFail($id);
         $password = bcrypt($requestData->password);
         $role = $requestData->roles;
         $department = $requestData->departments;
@@ -132,7 +132,7 @@ class UserRepository extends BaseRepository implements UserRepositoryContract
             return Session()->flash('flash_message_warning', 'Not allowed to delete super admin');
         }
         try {
-            $user = User::findorFail($id);
+            $user = $this->model->findorFail($id);
             $user->delete();
             Session()->flash('flash_message', 'User successfully deleted');
         } catch (\Illuminate\Database\QueryException $e) {

@@ -4,32 +4,41 @@ namespace App\Repositories\Client;
 use App\Models\Client;
 use App\Models\Industry;
 use App\Models\Invoices;
-use App\Models\TaskTime;
+use App\Repositories\BaseRepository;
 
-class ClientRepository implements ClientRepositoryContract
+class ClientRepository extends BaseRepository implements ClientRepositoryContract
 {
     const CREATED = 'created';
     const UPDATED_ASSIGN = 'updated_assign';
 
+    public function __construct(Client $client)
+    {
+        $this->model = $client;
+    }
+
     public function find($id)
     {
-        return Client::findOrFail($id);
+        $model = $this->cloneModel();
+        return $model->findOrFail($id);
     }
     public function listAllClients()
     {
-        return Client::pluck('name', 'id');
+        $model = $this->cloneModel();
+        return $model->pluck('name', 'id');
     }
 
     public function getInvoices($id)
     {
-        $invoice = Client::findOrFail($id)->invoices()->with('tasktime')->get();
+        $model = $this->cloneModel();
+        $invoice = $model->findOrFail($id)->invoices()->with('tasktime')->get();
 
         return $invoice;
     }
 
     public function getAllClientsCount()
     {
-        return Client::all()->count();
+        $model = $this->cloneModel();
+        return $model->count();
     }
 
     public function listAllIndustries()
@@ -39,21 +48,30 @@ class ClientRepository implements ClientRepositoryContract
 
     public function create($requestData)
     {
-        $client = Client::create($requestData);
+        $client = $this->model->create($requestData);
         Session()->flash('flash_message', 'Client successfully added');
         event(new \App\Events\ClientAction($client, self::CREATED));
+        return $client;
+    }
+
+    public function assignTenant($model, $id)
+    {
+        $model->tenant_id = $id;
+        $model->save();
     }
 
     public function update($id, $requestData)
     {
-        $client = Client::findOrFail($id);
+        $model = $this->cloneModel();
+        $client = $model->findOrFail($id);
         $client->fill($requestData->all())->save();
     }
 
     public function destroy($id)
     {
+        $model = $this->cloneModel();
         try {
-            $client = Client::findorFail($id);
+            $client = $model->findOrFail($id);
             $client->delete();
             Session()->flash('flash_message', 'Client successfully deleted');
         } catch (\Illuminate\Database\QueryException $e) {
@@ -69,7 +87,7 @@ class ClientRepository implements ClientRepositoryContract
 
         // Strip all other characters than numbers
         $vat = preg_replace('/[^0-9]/', '', $vat);
-        
+
         function cvrApi($vat)
         {
             if (empty($vat)) {

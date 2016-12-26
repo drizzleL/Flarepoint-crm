@@ -31,7 +31,7 @@ class TasksController extends Controller
     protected $settings;
     protected $users;
     protected $invoices;
-    
+
     public function __construct(
         TaskRepositoryContract $tasks,
         UserRepositoryContract $users,
@@ -61,10 +61,12 @@ class TasksController extends Controller
 
     public function anyData()
     {
-        $tasks = Tasks::select(
-            ['id', 'title', 'created_at', 'deadline', 'fk_user_id_assign']
-        )
-        ->where('status', 1)->get();
+        $this->tasks->belongsToTenant(auth()->user()->tenant_id);
+        $tasks = $this->tasks->returnModel()
+            ->select(
+                ['id', 'title', 'created_at', 'deadline', 'fk_user_id_assign']
+            )
+            ->where('status', 1)->get();
         return Datatables::of($tasks)
         ->addColumn('titlelink', function ($tasks) {
                 return '<a href="tasks/'.$tasks->id.'" ">'.$tasks->title.'</a>';
@@ -102,11 +104,12 @@ class TasksController extends Controller
      */
     public function store(StoreTaskRequest $request) // uses __contrust request
     {
-        $getInsertedId = $this->tasks->create($request);
-        return redirect()->route("tasks.show", $getInsertedId);
+        $task = $this->tasks->create($request);
+        $this->tasks->assignTenant($task, auth()->user()->tenant_id);
+        return redirect()->route("tasks.show", $task->id);
     }
 
-   
+
 
     /**
      * Display the specified resource.
@@ -117,7 +120,7 @@ class TasksController extends Controller
     public function show(Request $request, $id)
     {
         $integrationCheck = Integration::first();
-        
+
         if ($integrationCheck) {
             $api = Integration::getApi('billing');
             $apiConnected = true;
@@ -126,7 +129,7 @@ class TasksController extends Controller
             $apiConnected = false;
             $invoiceContacts = [];
         }
-        
+
         return view('tasks.show')
         ->withTasks($this->tasks->find($id))
         ->withUsers($this->users->getAllUsersWithDepartments())
@@ -156,7 +159,7 @@ class TasksController extends Controller
     {
         $clientId = $this->tasks->getAssignedClient($id)->id;
 
-        
+
         $this->tasks->updateAssign($id, $request);
         Session()->flash('flash_message', 'New user is assigned');
         return redirect()->back();

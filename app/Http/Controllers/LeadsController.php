@@ -51,12 +51,15 @@ class LeadsController extends Controller
     {
         return view('leads.index');
     }
-    
+
     public function anyData()
     {
-        $leads = Leads::select(
-            ['id', 'title', 'fk_user_id_created', 'fk_client_id', 'fk_user_id_assign', 'contact_date']
-        )->where('status', 1)->get();
+        $this->leads->belongsToTenant(auth()->user()->tenant_id);
+        $leads = $this->leads->returnModel()
+            ->select(
+                ['id', 'title', 'fk_user_id_created', 'fk_client_id',
+                'fk_user_id_assign', 'contact_date']
+            )->where('status', 1)->get();
         return Datatables::of($leads)
         ->addColumn('titlelink', function ($leads) {
                 return '<a href="leads/'.$leads->id.'" ">'.$leads->title.'</a>';
@@ -93,11 +96,12 @@ class LeadsController extends Controller
      */
     public function store(StoreLeadRequest $request)
     {
-        $getInsertedId = $this->leads->create($request);
+        $lead = $this->leads->create($request);
+        $this->leads->assignTenant($lead, auth()->user()->tenant_id);
         Session()->flash('flash_message', 'Lead is created');
-        return redirect()->route('leads.show', $getInsertedId);
+        return redirect()->route('leads.show', $lead->id);
     }
-   
+
     public function updateAssign($id, Request $request)
     {
         $this->leads->updateAssign($id, $request);
