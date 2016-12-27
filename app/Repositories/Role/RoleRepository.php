@@ -3,13 +3,19 @@ namespace App\Repositories\Role;
 
 use App\Models\Role;
 use App\Models\Permissions;
+use App\Repositories\BaseRepostiroy;
 
-class RoleRepository implements RoleRepositoryContract
+class RoleRepository extends BaseRepostiroy implements RoleRepositoryContract
 {
+    public function __construct(Role $role)
+    {
+        $this->model = $role;
+    }
 
     public function listAllRoles()
     {
-        return Role::pluck('name', 'id');
+        $model = $this->cloneModel();
+        return $model->pluck('name', 'id');
     }
 
     public function allPermissions()
@@ -19,7 +25,8 @@ class RoleRepository implements RoleRepositoryContract
 
     public function allRoles()
     {
-        return Role::all();
+        $model = $this->cloneModel();
+        return $model->get();
     }
 
     public function permissionsUpdate($requestData)
@@ -36,7 +43,7 @@ class RoleRepository implements RoleRepositoryContract
         } else {
             $allowed_permissions = [];
         }
-       
+
         $role = Role::find($requestData->input('role_id'));
 
         $role->permissions()->sync($allowed_permissions);

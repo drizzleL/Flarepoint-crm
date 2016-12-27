@@ -25,4 +25,9 @@ class Tenant extends Model
     {
         return $this->hasMany(Leads::class);
     }
+
+    public function roles()
+    {
+        return $this->hasMany(Role::class);
+    }
 }
